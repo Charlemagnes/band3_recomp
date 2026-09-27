@@ -10,6 +10,9 @@
 #include <rex/logging.h>
 #include <rex/ui/imgui_dialog.h>
 #include <imgui.h>
+#if REX_HAS_VULKAN
+#include <rex/graphics/vulkan/graphics_system.h>
+#endif
 
 #include "config.h"
 
@@ -46,6 +49,27 @@ class Band3App : public rex::ReXApp {
     paths.game_data_root = band3::GetConfig().game_data_root;
   }
 
+  // Runs before the GPU is created, so init-time render cvars still take effect.
+  void OnPreSetup(rex::RuntimeConfig& config) override {
+    const auto& cfg = band3::GetConfig();
+    if (cfg.gpu_backend == "vulkan") {
+#if REX_HAS_VULKAN
+      config.graphics = REX_GRAPHICS_BACKEND(rex::graphics::vulkan::VulkanGraphicsSystem);
+      REXLOG_INFO("GPU backend: Vulkan");
+#else
+      REXLOG_WARN("backend = vulkan, but this rexglue SDK was built without Vulkan; using the default backend");
+#endif
+    }
+
+    for (const auto& [name, value] : cfg.rexglue_cvars) {
+      if (rex::cvar::SetFlagByName(name, value)) {
+        REXLOG_INFO("rexglue cvar {} = '{}'", name, value);
+      } else {
+        REXLOG_WARN("Failed to set rexglue cvar {} = '{}'", name, value);
+      }
+    }
+  }
+
   void OnPostSetup() override {
     rex::cvar::SetFlagByName("log_level", band3::GetConfig().log_level);
     rex::cvar::SetFlagByName("audio_maxqframes", std::to_string(band3::GetConfig().max_queued_frames));
@@ -66,7 +90,6 @@ class Band3App : public rex::ReXApp {
 
   // Override virtual hooks for customization:
   // void OnPostInitLogging() override {}
-  // void OnPreSetup(rex::RuntimeConfig& config) override {}
   // void OnLoadXexImage(std::string& xex_image) override {}
   // void OnShutdown() override {}
 };

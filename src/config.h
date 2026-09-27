@@ -20,13 +20,18 @@ struct Config {
     bool fullbright = false;
     bool compress_character_textures = false;
     bool disable_even_odd_rendering = false;
+    std::string gpu_backend = "d3d12";
     long main_heap_size = 0;
     long char_heap_size = 0;
     std::string username;
     long max_queued_frames = 3;
     bool debug_overlay = true;
+    bool native_math = true;
+    bool native_camera_shake = true;
     std::string log_level = "info";
     std::string game_data_root = "assets";
+    // [rexglue] section: raw rexglue cvar overrides, applied before the GPU is created
+    std::vector<std::pair<std::string, std::string>> rexglue_cvars;
 };
 
 const Config& GetConfig();

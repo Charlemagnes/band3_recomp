@@ -55,6 +55,12 @@ void LoadConfig(const char* path) {
         reader.GetBoolean("graphics", "fullbright", g_config.fullbright);
     g_config.disable_even_odd_rendering =
         reader.GetBoolean("graphics", "disable_even_odd_rendering", g_config.disable_even_odd_rendering);
+    g_config.gpu_backend =
+        reader.Get("graphics", "backend", g_config.gpu_backend);
+    g_config.rexglue_cvars.clear();
+    for (const std::string& key : reader.Keys("rexglue")) {
+        g_config.rexglue_cvars.emplace_back(key, reader.Get("rexglue", key, ""));
+    }
     g_config.username =
         reader.Get("profile", "username", g_config.username);
     g_config.main_heap_size =
@@ -65,6 +71,10 @@ void LoadConfig(const char* path) {
         reader.GetInteger("audio", "max_queued_frames", g_config.max_queued_frames);
     g_config.debug_overlay =
         reader.GetBoolean("debug", "overlay", g_config.debug_overlay);
+    g_config.native_math =
+        reader.GetBoolean("debug", "native_math", g_config.native_math);
+    g_config.native_camera_shake =
+        reader.GetBoolean("debug", "native_camera_shake", g_config.native_camera_shake);
     g_config.log_level =
         reader.Get("debug", "log_level", g_config.log_level);
 
